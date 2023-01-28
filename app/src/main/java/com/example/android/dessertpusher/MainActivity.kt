@@ -28,6 +28,9 @@ import androidx.lifecycle.LifecycleObserver
 import com.example.android.dessertpusher.databinding.ActivityMainBinding
 import timber.log.Timber
 
+const val KEY_REVENUE = "key_revenue"
+const val KEY_DESSERT_SOLD = "key_dessertSold"
+
 class MainActivity : AppCompatActivity(), LifecycleObserver {
 
     private var revenue = 0
@@ -73,14 +76,19 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
             onDessertClicked()
         }
 
+        if (savedInstanceState != null) {
+            revenue = savedInstanceState.getInt(KEY_REVENUE)
+            dessertsSold = savedInstanceState.getInt(KEY_DESSERT_SOLD)
+        }
         // Set the TextViews to the right values
         binding.revenue = revenue
         binding.amountSold = dessertsSold
 
         // Make sure the correct dessert is showing
         binding.dessertButton.setImageResource(currentDessert.imageId)
-        dessertTimer = DessertTimer();
+        dessertTimer = DessertTimer(this.lifecycle);
 //        dessertTimer.startTimer()
+
     }
 
     /**
@@ -152,10 +160,24 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_REVENUE, revenue)
+        outState.putInt(KEY_DESSERT_SOLD, dessertsSold)
+        Timber.i("Adding data for saving to bundle in onSaveInstanceState")
+    }
+
+    /**
+     * Working after onStart()
+     */
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+    }
+
     override fun onStart() {
         super.onStart()
         Timber.i("OnStart was called")
-        dessertTimer.startTimer()
+//        dessertTimer.startTimer()
     }
 
     override fun onResume() {
@@ -171,7 +193,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
     override fun onStop() {
         super.onStop()
         Timber.i("onStop was called")
-        dessertTimer.stopTimer()
+//        dessertTimer.stopTimer()
     }
 
     override fun onDestroy() {
